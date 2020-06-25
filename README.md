@@ -6,9 +6,19 @@ Requirements were to implement a CRUD REST API for quotes.  See the full [prompt
 
 Implemented in Python, using the Flask web framework.
 
-Can be run locally or in the provided Dockerfile using `make start` or `make start_docker`.
+## Setup
 
-Future improvements:
+Can be run locally or in Docker using `make start` or `make start_docker`.
+
+## Supported endpoints/methods
+
+- `GET /quotes` returns all quotes
+- `GET /quotes/id` returns a single quote
+- `POST with json body to /quotes` to create a new quote
+- `PUT with json body to /quotes/id` to update an existing quote
+- `GET /authors` returns all authors
+
+## Future improvements
 
 - Database to replace temporary runtime storage of quotes and auth
   - Would allow for data persistance, efficent sorting and filtering options by other fields (e.g. return results oldest to newest)
