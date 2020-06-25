@@ -1,44 +1,20 @@
-import uuid
 import datetime
+import uuid
 
 import bcrypt
 from flask import Flask, jsonify, request
 from flask_httpauth import HTTPBasicAuth
 
+from .db import Database
+
+db = Database()
 app = Flask(__name__)
 auth = HTTPBasicAuth()
-
-# Would pull from real DB in prod
-USERS = {
-    'admin': '$2b$12$Goy2bJJfIwaU5Y1ZtBsMluu9xB66C8ywnsOD5Ucq5j1ZgQWgZQajq'
-}
-
-# Would pull from real DB in prod
-QUOTES = {
-    '770c57c2-eb1c-4346-a859-471d6ac0a47e': {
-        'author': 'Michael Stensby',
-        'quote': "Test quotes aren't memorable",
-        'created': datetime.datetime.now(),
-        'last_updated': datetime.datetime.now()
-    },
-    '770c57c2-eb1c-4346-a859-471d6ac0a47f': {
-        'author': 'Michael Stensby',
-        'quote': "Test quotes aren't generally memorable",
-        'created': datetime.datetime.now(),
-        'last_updated': datetime.datetime.now()
-    },
-    '770c57c2-eb1c-4346-a859-471d6ac0a47g': {
-        'author': 'Not Michael Stensby',
-        'quote': 'Test quotes should be memorable!',
-        'created': datetime.datetime.now(),
-        'last_updated': datetime.datetime.now()
-    }
-}
 
 
 @auth.verify_password
 def verify_password(username, password):
-    if username in USERS and bcrypt.checkpw(password.encode(), USERS.get(username).encode()):
+    if db.get_user(username) and bcrypt.checkpw(password.encode(), db.get_user(username).encode()):
         return username
 
 
@@ -53,12 +29,12 @@ def app_details():
 def quotes(quote_id):
     if request.method == 'GET':
         if quote_id:
-            quote = QUOTES.get(quote_id)
+            quote = db.get_quote(quote_id)
             if quote:
                 return jsonify({quote_id: quote})
             else:
                 return 'Quote not found.', 404
-        return jsonify(QUOTES)
+        return jsonify(db.get_quotes())
 
     elif request.method == 'POST':
         if quote_id:
@@ -75,16 +51,18 @@ def quotes(quote_id):
     elif request.method == 'DELETE':
         if quote_id:
             try:
-                QUOTES.pop(quote_id)
+                quotes = db.get_quotes()
+                quotes.pop(quote_id)
+                db.set_quotes(quotes)
             except KeyError:
                 return f'Failed to delete Quote ID: {quote_id}, invalid ID?', 400
             return f'Quote ID: {quote_id} deleted'
 
 
-@app.route('/authors')
+@app.route('/authors/')
 @auth.login_required
 def authors():
-    return jsonify(list(set([quote.get('author') for quote in QUOTES])))
+    return jsonify(list(set([quote.get('author') for quote in db.get_quotes().values()])))
 
 
 def create_quote(request):
@@ -92,24 +70,29 @@ def create_quote(request):
     author = request.json.get('author')
     if quote and author:
         quote_id = str(uuid.uuid4())
-        QUOTES[quote_id] = {'author': author,
+        quotes = db.get_quotes()
+        quotes[quote_id] = {'author': author,
                             'quote': quote,
                             'created': datetime.datetime.now(),
                             'last_updated': datetime.datetime.now()}
-        return jsonify({quote_id: QUOTES[quote_id]})
+        db.set_quotes(quotes)
+        return jsonify({quote_id: quotes[quote_id]})
     return 'Failed to add new quote, incorrect data format?', 400
 
 
 def update_quote(quote_id, request):
     quote = request.json.get('quote')
     author = request.json.get('author')
+    quotes = db.get_quotes()
     if quote:
-        QUOTES[quote_id]['quote'] = quote
+        quotes[quote_id]['quote'] = quote
     if author:
-        QUOTES[quote_id]['author'] = author
+        quotes[quote_id]['author'] = author
     if quote or author:
-        QUOTES[quote_id]['last_updated'] = datetime.datetime.now()
-    return jsonify({quote_id: QUOTES[quote_id]})
+        quotes[quote_id]['last_updated'] = datetime.datetime.now()
+
+    db.set_quotes(quotes)
+    return jsonify({quote_id: quotes[quote_id]})
 
 
 if __name__ == '__main__':
