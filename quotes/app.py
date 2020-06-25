@@ -1,5 +1,6 @@
 import datetime
 import uuid
+import os
 
 import bcrypt
 from flask import Flask, jsonify, request
@@ -96,4 +97,5 @@ def update_quote(quote_id, request):
 
 
 if __name__ == '__main__':
-    app.run('localhost', 5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run('0.0.0.0', port=port, debug=True)

@@ -2,7 +2,7 @@ import unittest
 import base64
 
 
-from ..quotes import app
+from ..app import app
 
 
 class TestBasicAuth(unittest.TestCase):

@@ -22,6 +22,5 @@ Can be run locally or in Docker using `make start` or `make start_docker`.
 
 - Database to replace temporary runtime storage of quotes and auth
   - Would allow for data persistance, efficent sorting and filtering options by other fields (e.g. return results oldest to newest)
-- Addition of unit tests
 - GraphQL endpoint instead of multiple rest endpoints/methods, allow for easy exploration of relationships between authors, quotes
-- Nginx proxy for SSL support (could also be provided by putting behind cloud hosting load balancer)
+- Put behind production ready webserver with nginx proxy for SSL support (could also be provided by putting behind cloud hosting load balancer)

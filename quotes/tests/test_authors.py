@@ -3,7 +3,7 @@ import base64
 import datetime
 
 
-from ..quotes import app, db
+from ..app import app, db
 
 
 class TestAuthors(unittest.TestCase):
@@ -11,7 +11,6 @@ class TestAuthors(unittest.TestCase):
     def setUp(self):
         credentials = base64.b64encode(b"admin:password").decode('utf-8')
         self.auth_header = {'Authorization': f'Basic {credentials}'}
-        print(db.get_quotes())
         db.set_quotes({
             '1': {
                 'author': 'Michael',

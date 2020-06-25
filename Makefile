@@ -5,7 +5,7 @@ build_docker:
 	docker build -t quotes-api .
 
 start: install
-	python -m quotes.quotes
+	python -m quotes.app
 
 start_docker: build_docker
 	docker run --name quotes-api --rm -ti -p 80:80 quotes-api
@@ -15,6 +15,6 @@ lint:
 
 test:
 	coverage run -m unittest
-	coverage report --include 'quotes/tests/*'
+	coverage report --include 'quotes/*'
 
 .PHONY: install build_docker start start_docker lint test
