@@ -1,0 +1,5 @@
+Flask
+bcrypt
+flake8
+coverage
+flask_httpauth
